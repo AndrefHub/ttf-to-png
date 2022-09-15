@@ -1,0 +1,34 @@
+#!/bin/bash
+#title           :ttf_to_png
+#description     :This script will convert ttf file to sequence of png files with transparent background.
+#author		     :kdancy
+#usage		     :bash mkscript.sh
+#notes           :Install fontforge and imagemagick to use this script.
+#bash_version    :4.1.5(1)-release
+#==============================================================================
+
+if test "$#" -ne 2; then
+    echo "Usage: ./ttf_to_png [font_name].ttf [dstdir]"
+	exit 1
+fi
+if ! which fontforge mogrify; then
+    echo "insuccifent dependencies!"
+	exit 1
+fi
+fontforge_script=$(dirname $0)/fontforge.py
+if [ ! -s "$fontforge_script" ]; then
+    echo "fontforge.py lost! reupload script from github!"
+	exit 1
+fi
+
+
+fontforge --quiet -script "$fontforge_script" "$1" 2> /dev/null
+mkdir -p "$2"
+mogrify -background none -size 1024x1024 -path "$2" -format png *.svg
+rm delete_*.svg
+cd "$2"
+for f in delete_*.png
+do
+	mv "$f" "${f#"delete_"}"
+done
+echo 'Convertation done! Resulting images are located in '"$2"' directory!'
